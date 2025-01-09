@@ -1,0 +1,35 @@
+import socket
+
+# Server configuration
+SERVER_IP = '127.0.0.1'
+SERVER_PORT = 3000
+
+def main():
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    server_socket.bind((SERVER_IP, SERVER_PORT))
+    print(f"Server started on {SERVER_IP}:{SERVER_PORT}, waiting for clients to connect...")
+
+    clients = []  # To store connected clients' addresses
+    while True:
+        try:
+            # Receive data from any client
+            data, addr = server_socket.recvfrom(1024)
+            print(f"Received data: {data.decode()} from {addr}")
+
+            # Add new clients to the list
+            if addr not in clients:
+                clients.append(addr)
+                print(f"New client connected: {addr}")
+
+            # Broadcast the data to all clients
+            for client in clients:
+                if client != addr:  # Avoid sending data back to the sender
+                    server_socket.sendto(data, client)
+                    print(f"Sent data to {client}")
+
+        except Exception as e:
+            print(f"Server error: {e}")
+            break
+
+if __name__ == "__main__":
+    main()
